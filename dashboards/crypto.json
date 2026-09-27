@@ -1,0 +1,82 @@
+{
+  "title": "Crypto",
+  "timeRange": "1D",
+  "variables": [],
+  "panels": [
+    {
+      "id": "btc-usd",
+      "type": "line",
+      "x": 4,
+      "y": 4,
+      "w": 4,
+      "h": 4,
+      "series": "crypto:BTC-USD",
+      "title": "BTC-USD",
+      "live": true,
+      "color": "#f59e0b"
+    },
+    {
+      "id": "new-1790463470864-0",
+      "type": "line",
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 4,
+      "series": "stock:NVDA",
+      "title": "stock:NVDA",
+      "live": false
+    },
+    {
+      "id": "new-1790467459946-0",
+      "type": "line",
+      "x": 4,
+      "y": 0,
+      "w": 4,
+      "h": 4,
+      "series": "stock:GOOGL",
+      "title": "stock:GOOGL",
+      "live": false,
+      "color": "#ef4444",
+      "referenceLine": 329.91
+    },
+    {
+      "id": "new-1790467514950-1",
+      "type": "line",
+      "x": 8,
+      "y": 0,
+      "w": 4,
+      "h": 4,
+      "series": "stock:URA",
+      "title": "stock:URA",
+      "live": false,
+      "color": "#22c55e",
+      "referenceLine": 60
+    },
+    {
+      "id": "new-1790467679452-2",
+      "type": "line",
+      "x": 0,
+      "y": 4,
+      "w": 4,
+      "h": 4,
+      "series": "stock:UPS",
+      "title": "stock:UPS",
+      "live": true,
+      "color": "#a855f7",
+      "referenceLine": 100
+    },
+    {
+      "id": "new-1790467723579-3",
+      "type": "line",
+      "x": 8,
+      "y": 4,
+      "w": 4,
+      "h": 4,
+      "series": "stock:VDC",
+      "title": "stock:VDC",
+      "live": false,
+      "color": "#06b6d4",
+      "referenceLine": 215
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Rates",
+  "timeRange": "1Y",
+  "variables": [],
+  "panels": [
+    {
+      "id": "dgs10",
+      "type": "line",
+      "x": 0,
+      "y": 4,
+      "w": 6,
+      "h": 4,
+      "series": [
+        "fred:DGS10",
+        "fred:DGS2"
+      ],
+      "title": "10-Year Treasury Yield",
+      "live": false
+    },
+    {
+      "id": "dgs2",
+      "type": "line",
+      "x": 6,
+      "y": 0,
+      "w": 6,
+      "h": 4,
+      "series": "fred:T10Y3M",
+      "title": "10Y - 3M Spread",
+      "live": false
+    },
+    {
+      "id": "spread",
+      "type": "line",
+      "x": 0,
+      "y": 12,
+      "w": 12,
+      "h": 4,
+      "series": "fred:DGS10 - fred:DGS2",
+      "title": "10Y - 2Y Spread"
+    },
+    {
+      "id": "new-1790386621649-0",
+      "type": "line",
+      "x": 0,
+      "y": 8,
+      "w": 6,
+      "h": 4,
+      "series": "fred:DGS30",
+      "title": "30 Year",
+      "live": false
+    },
+    {
+      "id": "new-1790395740700-0",
+      "type": "line",
+      "x": 0,
+      "y": 0,
+      "w": 6,
+      "h": 4,
+      "series": [
+        "fred:DGS10",
+        "fred:DGS3MO",
+        "fred:DGS30",
+        "fred:SOFR"
+      ],
+      "title": "SOFR, 3MO,10Yr,30Yr",
+      "live": false,
+      "color": "#ef4444"
+    }
+  ]
+}
