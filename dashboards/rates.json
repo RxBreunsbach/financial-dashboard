@@ -32,7 +32,7 @@
       "id": "spread",
       "type": "line",
       "x": 0,
-      "y": 12,
+      "y": 8,
       "w": 12,
       "h": 4,
       "series": "fred:DGS10 - fred:DGS2",
@@ -42,7 +42,7 @@
       "id": "new-1790386621649-0",
       "type": "line",
       "x": 0,
-      "y": 8,
+      "y": 12,
       "w": 6,
       "h": 4,
       "series": "fred:DGS30",
@@ -63,7 +63,19 @@
         "fred:SOFR"
       ],
       "title": "SOFR, 3MO,10Yr,30Yr",
-      "live": false,
+      "live": true,
+      "color": "#ef4444"
+    },
+    {
+      "id": "new-1790654849714-0",
+      "type": "line",
+      "x": 6,
+      "y": 4,
+      "w": 6,
+      "h": 4,
+      "series": "fred:DGS3MO",
+      "title": "fred\"DGS3MO",
+      "live": true,
       "color": "#ef4444"
     }
   ]

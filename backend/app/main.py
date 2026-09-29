@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import Body, FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
@@ -14,8 +15,20 @@ from app.archive.query import ArchiveQuery, QueryError
 from app.archive.writer import ArchiveWriter
 from app.config import ARCHIVE_ROOT, DASHBOARDS_ROOT
 from app.live import LiveManager
+from app.scheduler import create_scheduler
 
-app = FastAPI(title="Financial Dashboard")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    scheduler = create_scheduler()
+    scheduler.start()
+    try:
+        yield
+    finally:
+        scheduler.shutdown(wait=False)
+
+
+app = FastAPI(title="Financial Dashboard", lifespan=lifespan)
 archive_query = ArchiveQuery(ARCHIVE_ROOT)
 live_manager = LiveManager(ArchiveWriter(ARCHIVE_ROOT))
 

@@ -42,6 +42,7 @@ A personal dashboard for visualizing current and historical financial data (stoc
 - Python 3.12+
 - Node.js 20+ (Vite 8 requires 20.19+ or 22.12+)
 - A free [FRED API key](https://fred.stlouisfed.org/docs/api/api_key.html) for the FRED plugin (stocks and crypto plugins need no key)
+- Optional: a free [Finnhub API key](https://finnhub.io/register) — used to patch today's stock bar with a real-time quote when Yahoo Finance hasn't finalized the day's Close yet (Yahoo can leave Close/Open/High/Low null for a few hours after market close even though Volume is already posted)
 - Dependencies listed in `pyproject.toml` (backend) and `frontend/package.json` (frontend)
 
 ## Setup
@@ -50,7 +51,7 @@ A personal dashboard for visualizing current and historical financial data (stoc
 # Backend
 python -m venv .venv
 .\.venv\Scripts\pip install -e ".[dev]"
-Copy-Item .env.example .env   # then fill in FRED_API_KEY
+Copy-Item .env.example .env   # then fill in FRED_API_KEY (and optionally FINNHUB_API_KEY)
 
 # Frontend
 cd frontend

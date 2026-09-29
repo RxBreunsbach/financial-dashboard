@@ -59,3 +59,58 @@ def test_fetch_history_empty_history_returns_empty_dataframe() -> None:
 def test_ticker_symbol_falls_back_to_series_id_suffix() -> None:
     source = StockSource("stock:AAPL")
     assert source._ticker_symbol() == "AAPL"
+
+
+def _fake_history_with_unfinalized_latest_bar() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "Open": [900.0, float("nan")],
+            "High": [915.0, float("nan")],
+            "Low": [895.0, float("nan")],
+            "Close": [905.0, float("nan")],
+            "Volume": [1_000_000, 1_200_000],
+        },
+        index=pd.DatetimeIndex(["2024-01-02", "2024-01-03"], name="Date"),
+    )
+
+
+def test_fetch_history_patches_unfinalized_bar_with_finnhub_quote(monkeypatch) -> None:
+    monkeypatch.setenv("FINNHUB_API_KEY", "test-key")
+    source = StockSource("stock:NVDA", ticker="NVDA")
+    mock_ticker = MagicMock()
+    mock_ticker.history.return_value = _fake_history_with_unfinalized_latest_bar()
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"c": 918.0, "o": 910.0, "h": 920.0, "l": 905.0}
+
+    with (
+        patch("app.sources.stock.yf.Ticker", return_value=mock_ticker),
+        patch("app.sources.stock.requests.get", return_value=mock_response) as mock_get,
+    ):
+        df = source.fetch_history(
+            datetime(2024, 1, 1, tzinfo=timezone.utc),
+            datetime(2024, 1, 31, tzinfo=timezone.utc),
+        )
+
+    mock_get.assert_called_once()
+    assert mock_get.call_args.kwargs["params"] == {"symbol": "NVDA", "token": "test-key"}
+    assert df["value"].tolist() == [905.0, 918.0]
+    assert df["open"].tolist() == [900.0, 910.0]
+
+
+def test_fetch_history_skips_patch_without_finnhub_key(monkeypatch) -> None:
+    monkeypatch.delenv("FINNHUB_API_KEY", raising=False)
+    source = StockSource("stock:NVDA", ticker="NVDA")
+    mock_ticker = MagicMock()
+    mock_ticker.history.return_value = _fake_history_with_unfinalized_latest_bar()
+
+    with (
+        patch("app.sources.stock.yf.Ticker", return_value=mock_ticker),
+        patch("app.sources.stock.requests.get") as mock_get,
+    ):
+        df = source.fetch_history(
+            datetime(2024, 1, 1, tzinfo=timezone.utc),
+            datetime(2024, 1, 31, tzinfo=timezone.utc),
+        )
+
+    mock_get.assert_not_called()
+    assert pd.isna(df["value"].iloc[-1])

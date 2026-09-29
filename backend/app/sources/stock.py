@@ -2,14 +2,20 @@
 
 from __future__ import annotations
 
+import logging
+import os
 from datetime import datetime
 
 import pandas as pd
+import requests
 import yfinance as yf
 
 from app.sources.base import SeriesMetadata, Source
 
 OHLCV_COLUMNS = ["timestamp", "series_id", "value", "open", "high", "low", "close", "volume"]
+FINNHUB_QUOTE_URL = "https://finnhub.io/api/v1/quote"
+
+logger = logging.getLogger(__name__)
 
 
 class StockSource(Source):
@@ -40,7 +46,40 @@ class StockSource(Source):
                 "volume": history["Volume"],
             }
         )
-        return df.reset_index(drop=True)
+        df = df.reset_index(drop=True)
+        self._patch_unfinalized_latest_bar(df)
+        return df
+
+    def _patch_unfinalized_latest_bar(self, df: pd.DataFrame) -> None:
+        """Yahoo sometimes publishes today's bar with Volume but null OHLC/Close
+        for a few hours after close. Patch that row in place with Finnhub's
+        free real-time quote, if a key is configured, rather than leaving gaps."""
+        if df.empty or not pd.isna(df.loc[df.index[-1], "value"]):
+            return
+        api_key = os.environ.get("FINNHUB_API_KEY")
+        if not api_key:
+            return
+
+        try:
+            resp = requests.get(
+                FINNHUB_QUOTE_URL,
+                params={"symbol": self._ticker_symbol(), "token": api_key},
+                timeout=10,
+            )
+            resp.raise_for_status()
+            quote = resp.json()
+            price = quote.get("c")
+            if not price:
+                return
+        except (requests.RequestException, ValueError):
+            logger.exception("Finnhub quote patch failed for %s", self.series_id)
+            return
+
+        last = df.index[-1]
+        df.loc[last, ["value", "close"]] = price
+        for field, key in (("open", "o"), ("high", "h"), ("low", "l")):
+            if quote.get(key):
+                df.loc[last, field] = quote[key]
 
     def get_metadata(self) -> SeriesMetadata:
         info = yf.Ticker(self._ticker_symbol()).info

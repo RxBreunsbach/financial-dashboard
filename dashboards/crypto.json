@@ -10,10 +10,11 @@
       "y": 4,
       "w": 4,
       "h": 4,
-      "series": "crypto:BTC-USD",
-      "title": "BTC-USD",
+      "series": "stock:TAN",
+      "title": "stock:TAN",
       "live": true,
-      "color": "#f59e0b"
+      "color": "#f59e0b",
+      "referenceLine": 55.52
     },
     {
       "id": "new-1790463470864-0",
@@ -22,9 +23,10 @@
       "y": 0,
       "w": 4,
       "h": 4,
-      "series": "stock:NVDA",
-      "title": "stock:NVDA",
-      "live": false
+      "series": "stock:SMR",
+      "title": "stock:SMR",
+      "live": true,
+      "referenceLine": 16.2
     },
     {
       "id": "new-1790467459946-0",
@@ -35,7 +37,7 @@
       "h": 4,
       "series": "stock:GOOGL",
       "title": "stock:GOOGL",
-      "live": false,
+      "live": true,
       "color": "#ef4444",
       "referenceLine": 329.91
     },
@@ -48,7 +50,7 @@
       "h": 4,
       "series": "stock:URA",
       "title": "stock:URA",
-      "live": false,
+      "live": true,
       "color": "#22c55e",
       "referenceLine": 60
     },
@@ -74,7 +76,7 @@
       "h": 4,
       "series": "stock:VDC",
       "title": "stock:VDC",
-      "live": false,
+      "live": true,
       "color": "#06b6d4",
       "referenceLine": 215
     }
