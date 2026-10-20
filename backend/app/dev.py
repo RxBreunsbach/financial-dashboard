@@ -15,9 +15,12 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BACKEND_DIR = REPO_ROOT / "backend"
 FRONTEND_DIR = REPO_ROOT / "frontend"
+BACKEND_URL = "http://localhost:8000"
 
 
-def main() -> None:
+def launch_backend_and_frontend() -> tuple[subprocess.Popen, subprocess.Popen]:
+    """Starts the backend (uvicorn --reload) and frontend (vite dev) as subprocesses
+    and returns them immediately, without waiting for either to become ready."""
     npm = shutil.which("npm")
     if npm is None:
         print("npm not found on PATH; install Node.js first.", file=sys.stderr)
@@ -28,6 +31,11 @@ def main() -> None:
         cwd=REPO_ROOT,
     )
     frontend = subprocess.Popen([npm, "run", "dev"], cwd=FRONTEND_DIR)
+    return backend, frontend
+
+
+def main() -> None:
+    backend, frontend = launch_backend_and_frontend()
     procs = [backend, frontend]
 
     try:

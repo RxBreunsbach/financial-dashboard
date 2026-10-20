@@ -8,49 +8,111 @@ import {
 } from "./engine/dashboardLoader.js";
 import { createEditMode } from "./engine/editMode.js";
 import { addPanelWidget } from "./engine/gridWidgets.js";
-import {
-  createTimeRangeSelector,
-  TIME_RANGES,
-} from "./engine/timeRangeControls.js";
-import { WebSocketClient } from "./engine/websocketClient.js";
+import { KNOWN_SERIES } from "./engine/knownSeries.js";
+import { createTimeRangeSelector } from "./engine/timeRangeControls.js";
 import { getPanel } from "./panels/registry.js";
 import "./panels/line.js";
 
-const SINGLE_SERIES_ID = /^[a-zA-Z][a-zA-Z0-9_]*:[a-zA-Z0-9_.-]+$/;
+const REFRESH_INTERVAL_MS = 60_000; // periodically re-fetch every panel so all data stays current
 
 const params = new URLSearchParams(window.location.search);
 const dashboardName = params.get("dashboard") || "rates";
 
 const titleEl = document.querySelector("#app-title");
+const lastUpdatedEl = document.querySelector("#last-updated");
 const controlsEl = document.querySelector("#controls");
 const gridEl = document.querySelector("#grid");
-const wsClient = new WebSocketClient();
 
-/** Keyword ranges (1D/1W/.../Max) always resolve to "now" as their end; explicit "start:end" ranges don't. */
-function rangeIncludesNow(range) {
-  return TIME_RANGES.includes(range) || range.toUpperCase() === "YTD";
+function formatTimestamp(date, periodAnchored) {
+  if (periodAnchored) {
+    // Period-anchored series (FRED daily/weekly/monthly values, stock daily bars)
+    // label a whole day/week/month rather than a precise moment, always at a fixed
+    // UTC time-of-day. Converting that to the viewer's local timezone can roll the
+    // displayed calendar date back a day (e.g. UTC midnight becomes "yesterday,
+    // 5 PM" in US timezones) - so these show their UTC calendar date instead.
+    return date.toLocaleString(undefined, { dateStyle: "medium", timeZone: "UTC" });
+  }
+  return date.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+/**
+ * A series is "period-anchored" if consecutive points repeat the same UTC
+ * time-of-day, as opposed to genuinely intraday data (e.g. crypto ticks) whose
+ * time-of-day varies point to point. See formatTimestamp for why this matters.
+ */
+function isPeriodAnchored(points) {
+  if (points.length < 2) return false;
+  const timeOfDay = (p) => p.timestamp.slice(11, 19); // "HH:MM:SS" portion of the ISO string
+  return timeOfDay(points.at(-1)) === timeOfDay(points.at(-2));
+}
+
+const KNOWN_SERIES_LABELS = new Map(KNOWN_SERIES.map((s) => [s.id, s.label]));
+
+/** Friendly legend name for a series expression, falling back to the raw expression. */
+function traceLabel(expr) {
+  return KNOWN_SERIES_LABELS.get(expr) || expr;
+}
+
+const GRID_MARGIN = 8;
+const ROWS_VISIBLE = 2;
+const SIZE_BOOST = 1.05; // tested as comfortably fitting with a bit of room to spare
+
+/**
+ * Sizes grid rows so that ROWS_VISIBLE rows of panels fill the browser's actual
+ * visible height (accounting for the header and Chrome's own chrome/toolbars,
+ * which shrink window.innerHeight rather than the page's CSS viewport).
+ */
+function computeCellHeight(panelHeightUnits) {
+  const headerHeight = document.querySelector("header").offsetHeight;
+  const gridPadding = 16; // #grid has 0.5rem padding on top and bottom
+  const availableHeight = window.innerHeight - headerHeight - gridPadding;
+  const totalUnits = panelHeightUnits * ROWS_VISIBLE;
+  const totalMargins = GRID_MARGIN * (ROWS_VISIBLE + 1);
+  return Math.max(
+    40,
+    Math.floor(((availableHeight - totalMargins) / totalUnits) * SIZE_BOOST),
+  );
 }
 
 async function main() {
   const { spec, variables } = await loadDashboard(dashboardName);
   titleEl.textContent = spec.title;
 
+  const panelHeightUnits = Math.max(4, ...spec.panels.map((p) => p.h || 4));
   const grid = GridStack.init(
-    { column: 12, cellHeight: 80, margin: 8 },
+    {
+      column: 12,
+      cellHeight: computeCellHeight(panelHeightUnits),
+      margin: GRID_MARGIN,
+    },
     gridEl,
   );
+  window.addEventListener("resize", () => {
+    grid.cellHeight(computeCellHeight(panelHeightUnits));
+  });
   const instances = new Map();
-  const liveUnsubscribers = new Map();
   const renderTokens = new Map();
+  const panelLatestTimestamps = new Map();
   let timeRangeSelector;
 
   for (const panelSpec of spec.panels) {
     addPanelWidget(grid, panelSpec);
   }
 
+  function updateLastUpdatedDisplay() {
+    let latest = null;
+    for (const entry of panelLatestTimestamps.values()) {
+      if (!latest || entry.date > latest.date) latest = entry;
+    }
+    lastUpdatedEl.textContent = latest
+      ? `as of ${formatTimestamp(latest.date, latest.periodAnchored)}`
+      : "";
+  }
+
   function destroyPanel(panelId) {
-    liveUnsubscribers.get(panelId)?.();
-    liveUnsubscribers.delete(panelId);
     instances.get(panelId)?.destroy();
     instances.delete(panelId);
   }
@@ -79,9 +141,29 @@ async function main() {
     if (renderTokens.get(panelSpec.id) !== token) return;
 
     const traces = results.map((result, i) => ({
-      label: resolvedExprs[i],
+      label: traceLabel(resolvedExprs[i]),
       points: result.points,
     }));
+
+    const latestByTrace = traces
+      .map((t) => {
+        const last = t.points.at(-1);
+        return last && { timestamp: last.timestamp, periodAnchored: isPeriodAnchored(t.points) };
+      })
+      .filter(Boolean)
+      .reduce(
+        (latest, c) => (!latest || c.timestamp > latest.timestamp ? c : latest),
+        null,
+      );
+    if (latestByTrace) {
+      panelLatestTimestamps.set(panelSpec.id, {
+        date: new Date(latestByTrace.timestamp),
+        periodAnchored: latestByTrace.periodAnchored,
+      });
+    } else {
+      panelLatestTimestamps.delete(panelSpec.id);
+    }
+    updateLastUpdatedDisplay();
 
     destroyPanel(panelSpec.id);
 
@@ -93,35 +175,10 @@ async function main() {
       {
         title: panelSpec.title,
         color: panelSpec.color,
-        live: Boolean(panelSpec.live),
         referenceLine: panelSpec.referenceLine,
       },
     );
     instances.set(panelSpec.id, instance);
-
-    // Live streaming only makes sense for a single raw series id, not a multi-series overlay.
-    if (
-      panelSpec.live &&
-      resolvedExprs.length === 1 &&
-      rangeIncludesNow(range) &&
-      SINGLE_SERIES_ID.test(resolvedExprs[0])
-    ) {
-      const points = [...traces[0].points];
-      const unsubscribe = await wsClient.subscribe(
-        resolvedExprs[0],
-        (point) => {
-          if (renderTokens.get(panelSpec.id) !== token) return;
-          points.push({ timestamp: point.timestamp, value: point.value });
-          instance.update(points);
-        },
-      );
-      if (renderTokens.get(panelSpec.id) !== token) {
-        // A newer render started while we were subscribing; abandon this one.
-        unsubscribe();
-        return;
-      }
-      liveUnsubscribers.set(panelSpec.id, unsubscribe);
-    }
   }
 
   async function renderAll() {
@@ -136,10 +193,18 @@ async function main() {
     );
   }
 
+  // The dashboard JSON's `timeRange` is only a fallback default (and gets overwritten
+  // whenever edit mode's Save button runs, capturing whatever's active at that moment).
+  // The range you actually pick while browsing is remembered per-dashboard in
+  // localStorage instead, so it survives reloads independent of that save behavior.
+  const timeRangeStorageKey = `financial-dashboard:timeRange:${dashboardName}`;
+  const storedTimeRange = localStorage.getItem(timeRangeStorageKey);
+
   timeRangeSelector = createTimeRangeSelector(
     controlsEl,
-    spec.timeRange || "1Y",
-    () => {
+    storedTimeRange || spec.timeRange || "1Y",
+    (range) => {
+      localStorage.setItem(timeRangeStorageKey, range);
       renderAll().catch(reportError);
     },
   );
@@ -155,6 +220,9 @@ async function main() {
   });
 
   await renderAll();
+  setInterval(() => {
+    renderAll().catch(reportError);
+  }, REFRESH_INTERVAL_MS);
 }
 
 function reportError(err) {

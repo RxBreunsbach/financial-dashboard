@@ -17,7 +17,7 @@ dependencies = [
     "pyyaml",
     "requests",
     "yfinance",
-    "websockets",
+    "psutil",
 ]
 
 [project.optional-dependencies]
@@ -29,6 +29,8 @@ dev = [
 [project.scripts]
 backfill = "app.cli:main"
 dev = "app.dev:main"
+kiosk = "app.kiosk:main"
+fresh_start = "app.fresh_start:main"
 
 [tool.setuptools.packages.find]
 where = ["backend"]

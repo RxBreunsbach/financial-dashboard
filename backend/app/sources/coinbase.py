@@ -1,18 +1,15 @@
-"""Coinbase source plugin: crypto ticker history + live streaming (no API key required)."""
+"""Coinbase source plugin: crypto ticker history (no API key required)."""
 
 from __future__ import annotations
 
-import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 import pandas as pd
 import requests
-import websockets
 
 from app.sources.base import SeriesMetadata, Source
 
 CANDLES_URL = "https://api.exchange.coinbase.com/products/{product_id}/candles"
-WS_URL = "wss://ws-feed.exchange.coinbase.com"
 DAILY_GRANULARITY_SECONDS = 86400
 MAX_CANDLES_PER_REQUEST = 300  # Coinbase rejects requests spanning more candles than this
 HEADERS = {"User-Agent": "financial-dashboard/0.1"}
@@ -20,7 +17,7 @@ OHLCV_COLUMNS = ["timestamp", "series_id", "value", "open", "high", "low", "clos
 
 
 class CoinbaseSource(Source):
-    """Fetches/streams a Coinbase product, e.g. series_id="crypto:BTC-USD"."""
+    """Fetches a Coinbase product's daily candles, e.g. series_id="crypto:BTC-USD"."""
 
     def _product_id(self) -> str:
         return str(self.params.get("product_id") or self.series_id.partition(":")[2])
@@ -66,19 +63,3 @@ class CoinbaseSource(Source):
             units="USD",
             frequency="daily",
         )
-
-    async def stream(self):
-        product_id = self._product_id()
-        async with websockets.connect(WS_URL) as ws:
-            await ws.send(
-                json.dumps({"type": "subscribe", "product_ids": [product_id], "channels": ["ticker"]})
-            )
-            async for raw in ws:
-                message = json.loads(raw)
-                if message.get("type") != "ticker" or "price" not in message:
-                    continue
-                yield {
-                    "timestamp": datetime.now(timezone.utc),
-                    "series_id": self.series_id,
-                    "value": float(message["price"]),
-                }

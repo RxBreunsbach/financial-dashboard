@@ -1,0 +1,126 @@
+{
+  "title": "Markets",
+  "timeRange": "1M",
+  "variables": [],
+  "panels": [
+    {
+      "id": "new-1790463470864-0",
+      "type": "line",
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 2,
+      "series": "stock:SMR",
+      "title": "stock:SMR",
+      "referenceLine": 16.2
+    },
+    {
+      "id": "new-1790467459946-0",
+      "type": "line",
+      "x": 4,
+      "y": 0,
+      "w": 4,
+      "h": 2,
+      "series": "stock:GOOGL",
+      "title": "stock:GOOGL",
+      "color": "#ef4444",
+      "referenceLine": 329.91
+    },
+    {
+      "id": "new-1790467514950-1",
+      "type": "line",
+      "x": 8,
+      "y": 0,
+      "w": 4,
+      "h": 2,
+      "series": "stock:URA",
+      "title": "stock:URA",
+      "color": "#22c55e",
+      "referenceLine": 60
+    },
+    {
+      "id": "new-1790467679452-2",
+      "type": "line",
+      "x": 0,
+      "y": 2,
+      "w": 4,
+      "h": 2,
+      "series": "stock:UPS",
+      "title": "stock:UPS",
+      "color": "#a855f7",
+      "referenceLine": 100
+    },
+    {
+      "id": "new-1790467723579-3",
+      "type": "line",
+      "x": 8,
+      "y": 2,
+      "w": 4,
+      "h": 2,
+      "series": "stock:VDC",
+      "title": "stock:VDC",
+      "color": "#06b6d4",
+      "referenceLine": 215
+    },
+    {
+      "id": "new-1792289294132-0",
+      "type": "line",
+      "x": 0,
+      "y": 4,
+      "w": 4,
+      "h": 2,
+      "series": "stock:DJI",
+      "title": "ind:DJI",
+      "color": "#06b6d4"
+    },
+    {
+      "id": "new-1792289669120-1",
+      "type": "line",
+      "x": 8,
+      "y": 4,
+      "w": 4,
+      "h": 2,
+      "series": "stock:GSPC",
+      "title": "ind:S&P 500",
+      "color": "#ef4444"
+    },
+    {
+      "id": "new-1792289849881-2",
+      "type": "line",
+      "x": 4,
+      "y": 4,
+      "w": 4,
+      "h": 2,
+      "series": "stock:IXIC",
+      "title": "ind:NASDAC",
+      "color": "#22c55e"
+    },
+    {
+      "id": "cpi-ppi-yoy",
+      "type": "line",
+      "x": 0,
+      "y": 6,
+      "w": 4,
+      "h": 2,
+      "series": [
+        "fred:CPIAUCSL",
+        "fred:CPILFESL",
+        "fred:PPIFIS"
+      ],
+      "transform": "yoy",
+      "title": "Price Indexes (YoY %)"
+    },
+    {
+      "id": "new-1792400000000-0",
+      "type": "line",
+      "x": 4,
+      "y": 6,
+      "w": 4,
+      "h": 2,
+      "series": "stock:TAN",
+      "title": "stock:TAN",
+      "color": "#f59e0b",
+      "referenceLine": 55.55
+    }
+  ]
+}

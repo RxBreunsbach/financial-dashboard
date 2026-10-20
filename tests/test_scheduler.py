@@ -46,7 +46,12 @@ def _fake_config_and_registry(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
 def test_create_scheduler_adds_one_job_per_scheduled_entry() -> None:
     scheduler = scheduler_module.create_scheduler()
     job_ids = {job.id for job in scheduler.get_jobs()}
-    assert job_ids == {"fred:DGS10", "stock:URA"}
+    assert job_ids == {
+        "fred:DGS10",
+        "fred:DGS10:startup-catchup",
+        "stock:URA",
+        "stock:URA:startup-catchup",
+    }
 
 
 def test_run_job_writes_to_archive(tmp_path: Path) -> None:

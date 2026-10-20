@@ -1,35 +1,9 @@
 from __future__ import annotations
 
-import asyncio
-import json
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 from app.sources.coinbase import CoinbaseSource
-
-
-class _FakeWebSocket:
-    def __init__(self, messages: list[str]) -> None:
-        self._messages = messages
-        self.sent: list[str] = []
-
-    async def send(self, message: str) -> None:
-        self.sent.append(message)
-
-    async def __aiter__(self):
-        for message in self._messages:
-            yield message
-
-
-class _FakeConnectCtx:
-    def __init__(self, ws: _FakeWebSocket) -> None:
-        self._ws = ws
-
-    async def __aenter__(self) -> _FakeWebSocket:
-        return self._ws
-
-    async def __aexit__(self, exc_type, exc, tb) -> bool:
-        return False
 
 
 def test_fetch_history_shapes_ohlcv_dataframe() -> None:
@@ -86,25 +60,3 @@ def test_fetch_history_chunks_long_ranges() -> None:
 
     assert mock_get.call_count > 1
     assert not df.empty
-
-
-def test_stream_yields_ticker_prices_and_ignores_other_messages(monkeypatch) -> None:
-    ws = _FakeWebSocket(
-        [
-            json.dumps({"type": "subscriptions"}),
-            json.dumps({"type": "ticker", "price": "65000.5"}),
-            json.dumps({"type": "ticker", "price": "65010.25"}),
-        ]
-    )
-    monkeypatch.setattr("app.sources.coinbase.websockets.connect", lambda url: _FakeConnectCtx(ws))
-
-    source = CoinbaseSource("crypto:BTC-USD")
-
-    async def collect() -> list[dict]:
-        return [point async for point in source.stream()]
-
-    points = asyncio.run(collect())
-
-    assert [p["value"] for p in points] == [65000.5, 65010.25]
-    assert all(p["series_id"] == "crypto:BTC-USD" for p in points)
-    assert json.loads(ws.sent[0])["product_ids"] == ["BTC-USD"]

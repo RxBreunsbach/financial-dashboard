@@ -59,6 +59,21 @@ sources:
     fred_series_id: FEDFUNDS
     schedule: "0 6 * * *"
 
+  - series_id: fred:CPIAUCSL
+    plugin: fred
+    fred_series_id: CPIAUCSL
+    schedule: "0 6 * * *"
+
+  - series_id: fred:CPILFESL
+    plugin: fred
+    fred_series_id: CPILFESL
+    schedule: "0 6 * * *"
+
+  - series_id: fred:PPIFIS
+    plugin: fred
+    fred_series_id: PPIFIS
+    schedule: "0 6 * * *"
+
   - series_id: fred:SOFR
     plugin: fred
     fred_series_id: SOFR
@@ -89,40 +104,125 @@ sources:
     fred_series_id: BAMLH0A0HYM2
     schedule: "0 6 * * *"
 
+  - series_id: fred:DCOILWTICO
+    plugin: fred
+    fred_series_id: DCOILWTICO
+    schedule: "0 6 * * *"
+
+  - series_id: fred:GASDESW
+    plugin: fred
+    fred_series_id: GASDESW
+    schedule: "0 6 * * *"
+
+  - series_id: fred:IMPCH
+    plugin: fred
+    fred_series_id: IMPCH
+    schedule: "0 6 * * *"
+
+  - series_id: fred:EXPCH
+    plugin: fred
+    fred_series_id: EXPCH
+    schedule: "0 6 * * *"
+
+  - series_id: fred:IMPCA
+    plugin: fred
+    fred_series_id: IMPCA
+    schedule: "0 6 * * *"
+
+  - series_id: fred:EXPCA
+    plugin: fred
+    fred_series_id: EXPCA
+    schedule: "0 6 * * *"
+
+  - series_id: fred:IMPMX
+    plugin: fred
+    fred_series_id: IMPMX
+    schedule: "0 6 * * *"
+
+  - series_id: fred:EXPMX
+    plugin: fred
+    fred_series_id: EXPMX
+    schedule: "0 6 * * *"
+
+  - series_id: fred:IMPJP
+    plugin: fred
+    fred_series_id: IMPJP
+    schedule: "0 6 * * *"
+
+  - series_id: fred:EXPJP
+    plugin: fred
+    fred_series_id: EXPJP
+    schedule: "0 6 * * *"
+
+  - series_id: fred:IMP0003
+    plugin: fred
+    fred_series_id: IMP0003
+    schedule: "0 6 * * *"
+
+  - series_id: fred:EXP0003
+    plugin: fred
+    fred_series_id: EXP0003
+    schedule: "0 6 * * *"
+
+  - series_id: fred:BOPGIMP
+    plugin: fred
+    fred_series_id: BOPGIMP
+    schedule: "0 6 * * *"
+
+  - series_id: fred:BOPGEXP
+    plugin: fred
+    fred_series_id: BOPGEXP
+    schedule: "0 6 * * *"
+
   - series_id: stock:NVDA
     plugin: stock
     ticker: NVDA
-    schedule: "0 21 * * 1-5"
+    schedule: "*/15 16-20 * * 1-5"
 
   - series_id: stock:URA
     plugin: stock
     ticker: URA
-    schedule: "0 21 * * 1-5"
+    schedule: "*/15 16-20 * * 1-5"
 
   - series_id: stock:GOOGL
     plugin: stock
     ticker: GOOGL
-    schedule: "0 21 * * 1-5"
+    schedule: "*/15 16-20 * * 1-5"
 
   - series_id: stock:VDC
     plugin: stock
     ticker: VDC
-    schedule: "0 21 * * 1-5"
+    schedule: "*/15 16-20 * * 1-5"
 
   - series_id: stock:TAN
     plugin: stock
     ticker: TAN
-    schedule: "0 21 * * 1-5"
+    schedule: "*/15 16-20 * * 1-5"
 
   - series_id: stock:UPS
     plugin: stock
     ticker: UPS
-    schedule: "0 21 * * 1-5"
+    schedule: "*/15 16-20 * * 1-5"
 
   - series_id: stock:SMR
     plugin: stock
     ticker: SMR
-    schedule: "0 21 * * 1-5"
+    schedule: "*/15 16-20 * * 1-5"
+
+  - series_id: stock:DJI
+    plugin: stock
+    ticker: "^DJI"
+    schedule: "*/15 16-20 * * 1-5"
+
+  - series_id: stock:IXIC
+    plugin: stock
+    ticker: "^IXIC"
+    schedule: "*/15 16-20 * * 1-5"
+
+  - series_id: stock:GSPC
+    plugin: stock
+    ticker: "^GSPC"
+    schedule: "*/15 16-20 * * 1-5"
 
   - series_id: crypto:BTC-USD
     plugin: coinbase

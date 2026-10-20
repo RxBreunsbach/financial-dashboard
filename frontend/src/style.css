@@ -22,6 +22,17 @@ header {
   margin: 0;
 }
 
+.title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+#last-updated {
+  font-size: 0.75rem;
+  color: #8b96a5;
+}
+
 #controls {
   display: flex;
   align-items: center;

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 import requests
@@ -25,9 +25,12 @@ class StockSource(Source):
         return str(self.params.get("ticker") or self.series_id.partition(":")[2])
 
     def fetch_history(self, start: datetime, end: datetime) -> pd.DataFrame:
+        # yfinance's `end` is exclusive, so a bare today's-date string would silently
+        # drop today's own bar on every call, no matter how many times it's re-fetched
+        # intraday/after close - push it a day later so today is actually included.
         history = yf.Ticker(self._ticker_symbol()).history(
             start=start.strftime("%Y-%m-%d"),
-            end=end.strftime("%Y-%m-%d"),
+            end=(end + timedelta(days=1)).strftime("%Y-%m-%d"),
             auto_adjust=False,
         )
         if history.empty:

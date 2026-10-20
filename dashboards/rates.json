@@ -4,66 +4,40 @@
   "variables": [],
   "panels": [
     {
-      "id": "dgs10",
-      "type": "line",
-      "x": 0,
-      "y": 4,
-      "w": 6,
-      "h": 4,
-      "series": [
-        "fred:DGS10",
-        "fred:DGS2"
-      ],
-      "title": "10-Year Treasury Yield",
-      "live": false
-    },
-    {
       "id": "dgs2",
       "type": "line",
-      "x": 6,
+      "x": 4,
       "y": 0,
-      "w": 6,
+      "w": 4,
       "h": 4,
-      "series": "fred:T10Y3M",
-      "title": "10Y - 3M Spread",
-      "live": false
+      "series": "fred:DGS2 - fred:DGS3MO",
+      "title": "2Y - 3M"
     },
     {
       "id": "spread",
       "type": "line",
       "x": 0,
-      "y": 8,
-      "w": 12,
-      "h": 4,
-      "series": "fred:DGS10 - fred:DGS2",
-      "title": "10Y - 2Y Spread"
-    },
-    {
-      "id": "new-1790386621649-0",
-      "type": "line",
-      "x": 0,
-      "y": 12,
+      "y": 4,
       "w": 6,
       "h": 4,
-      "series": "fred:DGS30",
-      "title": "30 Year",
-      "live": false
+      "series": "fred:DCOILWTICO",
+      "title": "WTI Crude $/barrel)"
     },
     {
       "id": "new-1790395740700-0",
       "type": "line",
       "x": 0,
       "y": 0,
-      "w": 6,
+      "w": 4,
       "h": 4,
       "series": [
         "fred:DGS10",
+        "fred:DGS2",
         "fred:DGS3MO",
         "fred:DGS30",
         "fred:SOFR"
       ],
       "title": "SOFR, 3MO,10Yr,30Yr",
-      "live": true,
       "color": "#ef4444"
     },
     {
@@ -73,10 +47,25 @@
       "y": 4,
       "w": 6,
       "h": 4,
-      "series": "fred:DGS3MO",
-      "title": "fred\"DGS3MO",
-      "live": true,
+      "series": "fred:GASDESW * 42",
+      "title": "Diesel",
       "color": "#ef4444"
+    },
+    {
+      "id": "new-1790909068132-0",
+      "type": "line",
+      "x": 8,
+      "y": 0,
+      "w": 4,
+      "h": 4,
+      "series": [
+        "fred:IMPCH - fred:EXPCH",
+        "fred:IMPCA - fred:EXPCA",
+        "fred:IMPMX - fred:EXPMX",
+        "fred:IMPJP - fred:EXPJP",
+        "fred:IMP0003 - fred:EXP0003"
+      ],
+      "title": "Balance of Trade"
     }
   ]
 }

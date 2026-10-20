@@ -126,7 +126,12 @@ class ArchiveQuery:
         if not series_ids:
             raise QueryError(f"No series ids found in expression: {series_expr!r}")
 
-        aligned = self._load_aligned(series_ids, start, end)
+        # yoy needs a year of data before `start` to compute the earliest requested points;
+        # load that extra history, then trim back down to the requested range before returning.
+        transform_name = transform.partition(":")[0].strip().lower()
+        load_start = start - timedelta(days=366) if transform_name == "yoy" else start
+
+        aligned = self._load_aligned(series_ids, load_start, end)
         if aligned.empty:
             return []
 
@@ -134,6 +139,7 @@ class ArchiveQuery:
         values = self._apply_transform(transform, series_ids, aligned, values)
 
         result = pd.DataFrame({"timestamp": aligned["timestamp"], "value": values}).dropna(subset=["value"])
+        result = result[result["timestamp"] >= start]
         result = _resample(result, start, end)
         return [{"timestamp": ts.isoformat(), "value": float(v)} for ts, v in zip(result["timestamp"], result["value"])]
 

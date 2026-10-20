@@ -39,8 +39,3 @@ class Source(ABC):
     def get_metadata(self) -> SeriesMetadata:
         """Return metadata describing this series. Override for real metadata."""
         raise NotImplementedError
-
-    async def stream(self):
-        """Optional: yield live updates for this series. Override to support streaming."""
-        raise NotImplementedError
-        yield  # pragma: no cover - marks this method as an async generator

@@ -7,14 +7,12 @@ import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Body, FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import Body, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app.archive.query import ArchiveQuery, QueryError
-from app.archive.writer import ArchiveWriter
 from app.config import ARCHIVE_ROOT, DASHBOARDS_ROOT
-from app.live import LiveManager
 from app.scheduler import create_scheduler
 
 
@@ -30,7 +28,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Financial Dashboard", lifespan=lifespan)
 archive_query = ArchiveQuery(ARCHIVE_ROOT)
-live_manager = LiveManager(ArchiveWriter(ARCHIVE_ROOT))
 
 # Dev-only: allow the Vite dev server to call the API cross-origin.
 app.add_middleware(
@@ -70,30 +67,6 @@ def save_dashboard(name: str, spec: dict = Body(...)) -> dict:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(spec, indent=2) + "\n", encoding="utf-8")
     return spec
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket) -> None:
-    """Clients send {"action": "subscribe"|"unsubscribe", "series_id": "crypto:BTC-USD"} messages."""
-    await websocket.accept()
-    subscribed: set[str] = set()
-    try:
-        while True:
-            message = await websocket.receive_json()
-            series_id = message.get("series_id")
-            if not series_id:
-                continue
-            if message.get("action") == "subscribe":
-                await live_manager.subscribe(series_id, websocket)
-                subscribed.add(series_id)
-            elif message.get("action") == "unsubscribe":
-                await live_manager.unsubscribe(series_id, websocket)
-                subscribed.discard(series_id)
-    except WebSocketDisconnect:
-        pass
-    finally:
-        for series_id in subscribed:
-            await live_manager.unsubscribe(series_id, websocket)
 
 
 class QueryPoint(BaseModel):

@@ -61,6 +61,23 @@ def test_ticker_symbol_falls_back_to_series_id_suffix() -> None:
     assert source._ticker_symbol() == "AAPL"
 
 
+def test_fetch_history_end_date_is_padded_so_todays_bar_is_included() -> None:
+    """yfinance's `end` is exclusive, so passing the bare `end` date would silently
+    drop that day's own bar on every call - regression test for that off-by-one."""
+    source = StockSource("stock:NVDA", ticker="NVDA")
+    mock_ticker = MagicMock()
+    mock_ticker.history.return_value = _fake_history()
+
+    with patch("app.sources.stock.yf.Ticker", return_value=mock_ticker):
+        source.fetch_history(
+            datetime(2024, 1, 1, tzinfo=timezone.utc),
+            datetime(2024, 1, 31, tzinfo=timezone.utc),
+        )
+
+    assert mock_ticker.history.call_args.kwargs["start"] == "2024-01-01"
+    assert mock_ticker.history.call_args.kwargs["end"] == "2024-02-01"
+
+
 def _fake_history_with_unfinalized_latest_bar() -> pd.DataFrame:
     return pd.DataFrame(
         {

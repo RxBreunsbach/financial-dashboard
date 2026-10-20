@@ -62,9 +62,7 @@ function buildReferenceLine(referenceLine) {
 /** Line panel: renders one or more overlaid Plotly line traces. Returns { update(points), destroy() }. */
 function render(el, data, options = {}) {
   const traces = buildTraces(data.traces, options.color);
-  const titleText = options.title
-    ? (options.live ? "\u{1F551} " : "") + options.title
-    : undefined;
+  const titleText = options.title;
   const { shapes, annotations } = buildReferenceLine(options.referenceLine);
   Plotly.newPlot(
     el,
@@ -72,13 +70,13 @@ function render(el, data, options = {}) {
     {
       title: titleText ? { text: titleText } : undefined,
       showlegend: data.traces.length > 1,
-      legend: { orientation: "h", y: -0.2 },
+      legend: { orientation: "h", y: -0.2, font: { size: 9, color: "#6b7280" } },
       shapes,
       annotations,
       margin: {
         t: options.title ? 32 : 8,
         r: 8,
-        b: data.traces.length > 1 ? 48 : 32,
+        b: data.traces.length > 1 ? 40 : 32,
         l: 48,
       },
       paper_bgcolor: "transparent",

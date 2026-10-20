@@ -27,7 +27,7 @@ function parseSeriesInput(value) {
 
 /**
  * Adds an Edit-mode toggle to the dashboard: enables GridStack drag/resize,
- * a click-to-select panel editor (title/series/transform/timeRange/live),
+ * a click-to-select panel editor (title/series/transform/timeRange),
  * add/remove panel buttons, and a Save button that PUTs the spec back to
  * the backend (which writes it to dashboards/<name>.json).
  */
@@ -81,7 +81,6 @@ export function createEditMode({
     <label>Transform <input name="transform" placeholder="none" /></label>
     <label>Time range <input name="timeRange" placeholder="(uses global range)" /></label>
     <label>Reference line <input name="referenceLine" type="number" step="any" placeholder="e.g. purchase price" /></label>
-    <label class="checkbox"><input type="checkbox" name="live" /> Live</label>
     <div class="color-swatches" role="group" aria-label="Line color">
       ${COLOR_PALETTE.map(
         (c) =>
@@ -119,9 +118,7 @@ export function createEditMode({
       editorForm.elements.series.value = seriesToInputValue(panelSpec.series);
       editorForm.elements.transform.value = panelSpec.transform ?? "";
       editorForm.elements.timeRange.value = panelSpec.timeRange ?? "";
-      editorForm.elements.referenceLine.value =
-        panelSpec.referenceLine ?? "";
-      editorForm.elements.live.checked = Boolean(panelSpec.live);
+      editorForm.elements.referenceLine.value = panelSpec.referenceLine ?? "";
       const activeColor = panelSpec.color || COLOR_PALETTE[0].value;
       for (const swatch of colorSwatches) {
         swatch.classList.toggle(
@@ -148,6 +145,14 @@ export function createEditMode({
     editorForm.elements.series.dispatchEvent(
       new Event("input", { bubbles: true }),
     );
+
+    // Only auto-fill the title if the user hasn't already typed a custom one.
+    if (!editorForm.elements.title.value.trim() && ids.length) {
+      editorForm.elements.title.value = ids.join(", ");
+      editorForm.elements.title.dispatchEvent(
+        new Event("input", { bubbles: true }),
+      );
+    }
   });
 
   // Close the dropdown when clicking anywhere outside it.
@@ -184,7 +189,6 @@ export function createEditMode({
     panelSpec.referenceLine = editorForm.elements.referenceLine.value
       ? Number(editorForm.elements.referenceLine.value)
       : undefined;
-    panelSpec.live = editorForm.elements.live.checked;
 
     if (hasValidSeries(panelSpec.series)) {
       renderPanel(panelSpec).catch((err) => {
