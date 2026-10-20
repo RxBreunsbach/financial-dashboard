@@ -51,6 +51,16 @@
       "referenceLine": 100
     },
     {
+      "id": "mortgage30us",
+      "type": "line",
+      "x": 4,
+      "y": 2,
+      "w": 4,
+      "h": 2,
+      "series": "fred:MORTGAGE30US",
+      "title": "30-Year Fixed Mortgage Rate"
+    },
+    {
       "id": "new-1790467723579-3",
       "type": "line",
       "x": 8,
