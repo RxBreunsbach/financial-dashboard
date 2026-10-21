@@ -54,7 +54,7 @@
       "id": "mortgage30us",
       "type": "line",
       "x": 4,
-      "y": 2,
+      "y": 6,
       "w": 4,
       "h": 2,
       "series": "fred:MORTGAGE30US",
@@ -124,13 +124,23 @@
       "id": "new-1792400000000-0",
       "type": "line",
       "x": 4,
-      "y": 6,
+      "y": 2,
       "w": 4,
       "h": 2,
       "series": "stock:TAN",
       "title": "stock:TAN",
       "color": "#f59e0b",
       "referenceLine": 55.55
+    },
+    {
+      "id": "dexjpus",
+      "type": "line",
+      "x": 8,
+      "y": 6,
+      "w": 4,
+      "h": 2,
+      "series": "fred:DEXJPUS",
+      "title": "Japanese Yen per US Dollar (JPY/USD)"
     }
   ]
 }

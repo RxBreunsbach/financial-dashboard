@@ -114,6 +114,11 @@ sources:
     fred_series_id: GASDESW
     schedule: "0 6 * * *"
 
+  - series_id: fred:DEXJPUS
+    plugin: fred
+    fred_series_id: DEXJPUS
+    schedule: "0 6 * * *"
+
   - series_id: fred:IMPCH
     plugin: fred
     fred_series_id: IMPCH

@@ -72,6 +72,10 @@ export const KNOWN_SERIES = [
     id: "fred:GASDESW * 42",
     label: "fred:GASDESW * 42 — US Diesel Retail Price ($/barrel, 42 gal)",
   },
+  {
+    id: "fred:DEXJPUS",
+    label: "fred:DEXJPUS — Japanese Yen per US Dollar (JPY/USD)",
+  },
 
   // Trade balances (raw series are monthly, in $ millions, goods only)
   { id: "fred:IMPCH", label: "fred:IMPCH — US Imports from China ($M)" },
