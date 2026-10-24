@@ -77,6 +77,12 @@ def create_scheduler() -> BackgroundScheduler:
             args=[entry],
             id=series_id,
             replace_existing=True,
+            # Same APScheduler pitfall as the catch-up job below: the default
+            # misfire_grace_time is 1 second, so any tick where the background
+            # scheduler thread wakes up even slightly late (routine under real
+            # process load) is silently dropped as "missed" instead of run late,
+            # which otherwise leaves recurring refreshes never actually firing.
+            misfire_grace_time=None,
         )
         scheduler.add_job(
             _run_job,
